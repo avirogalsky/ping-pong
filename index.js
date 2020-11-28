@@ -1,12 +1,12 @@
 const express = require('express')
-const https = require('http')
+const http = require('http')
 
 const apiApp = express()
 const pingApp = express()
 
-const apiPort = process.env.API_PORT
-const myPingPort = process.env.MY_PING_PORT
-const otherPingPort = process.env.OTHER_PONG_PORT
+const apiPort = 4000
+const pingPort = 5000
+const peer = process.env.PEER
 
 apiApp.get('/pingpong', (req, res) => {
   let iterations=req.query.iterations
@@ -15,7 +15,7 @@ apiApp.get('/pingpong', (req, res) => {
 })
 
 apiApp.listen(apiPort, () => {
-  console.log(`API app listening at http://localhost:${apiPort}`)
+  console.log(`API app listening`)
 })
 
 pingApp.get('/ping', (req, res) => {
@@ -23,8 +23,8 @@ pingApp.get('/ping', (req, res) => {
   res.send('pong')
 })
   
-pingApp.listen(myPingPort, () => {
-console.log(`Ping app listening at http://localhost:${myPingPort}`)
+pingApp.listen(pingPort, () => {
+console.log(`Ping app listening`)
 })
 
 function ping(currentIteration ,totalIterations, gameStartTime) {
@@ -48,14 +48,14 @@ function ping(currentIteration ,totalIterations, gameStartTime) {
   }
 
   const options = {
-    hostname: 'localhost',
-    port: otherPingPort,
+    hostname: peer,
+    port: pingPort,
     secure:false,
     path: `/ping?iteration=${currentIteration}`,
     method: 'GET'
   }
 
-  const req = https.request(options, callback);
+  const req = http.request(options, callback);
 
   req.on('error', error => {
     console.error(error)

@@ -8,7 +8,7 @@ services:
       - '4001:4000'
   app2:
     build: .
-    environment:
+    environment:  
       - PEER=app1
     ports:
       - '4002:4000'
