@@ -1,60 +1,65 @@
-const express = require('express');
-const peer = process.env.PEER;
+const express = require('express')
+const https = require('http')
 
-var app = express();
-//var app1 = express();
+const apiApp = express()
+const pingApp = express()
 
-app.get('/pingpong/', function(req, res) {
-//  game_start=1
-//  const fork = require ('child_process').fork;
+const apiPort = process.env.API_PORT
+const myPingPort = process.env.MY_PING_PORT
+const otherPingPort = process.env.OTHER_PONG_PORT
 
-//fork func ping &
-  res.send('Number of iterations ' + req.query.iterations);
+apiApp.get('/pingpong', (req, res) => {
+  let iterations=req.query.iterations
+  ping(1, iterations, Date.now())
+  res.send('started ping pong');
+})
 
-});
+apiApp.listen(apiPort, () => {
+  console.log(`API app listening at http://localhost:${apiPort}`)
+})
 
-/* func ping  (iterations) {
-for (i=0, i <iterations; i++)
-{ print ping 
-  call http endpoing ping of the PEER and wait for response (print)
+pingApp.get('/ping', (req, res) => {
+  console.log(`${Date.now()} pong ${req.query.iteration}`)
+  res.send('pong')
+})
+  
+pingApp.listen(myPingPort, () => {
+console.log(`Ping app listening at http://localhost:${myPingPort}`)
+})
 
+function ping(currentIteration ,totalIterations, gameStartTime) {
+  let startTimeInMillis = Date.now();
+  console.log(`${Date.now()} ping ${currentIteration}`)
+
+  callback = function(response) {
+    response.on('data', function (chunk) {
+    });
+
+    response.on('end', function () {
+      iterationTime = Date.now() - startTimeInMillis;
+      console.log(`${Date.now()} iteration ${currentIteration} done, took ${iterationTime} milliseconds`);
+      if (currentIteration == totalIterations) {
+        gameTotalTime = Date.now() - gameStartTime;
+        console.log(`${Date.now()} Game Over, took ${gameTotalTime} ms`);
+      } else {
+        ping (currentIteration + 1, totalIterations, gameStartTime);
+      }
+    });
+  }
+
+  const options = {
+    hostname: 'localhost',
+    port: otherPingPort,
+    secure:false,
+    path: `/ping?iteration=${currentIteration}`,
+    method: 'GET'
+  }
+
+  const req = https.request(options, callback);
+
+  req.on('error', error => {
+    console.error(error)
+  })
+
+  req.end();
 }
-pring game Over
-} */
-
-
-//tell express what to do when the / route is requested
-//app1.get('/ping', function(req, res) {
-//  console.log('pong');
-//  res.send (epmty);
-//)};
-//  var i = 1,
-//    max = 5; //req.query.iterations;
-
-app.get('/ping/', function(req, res) {
-  console.log('pong');
-  console.log(peer);
-  });
-
-/*   client.get('visits', (err, visits) => {
-  //send multiple responses to the client
-//    for (; i <= max; i++) {
-      res.send('Number of visits ' + visits);
-      client.set('visits', parseInt(visits) + 1);
- //   }
-  }); */
-
-  //end the response process
-//  res.end();
-//});
-
-/* app.get('/', function(req, res) {
-client.get('visits', (err, visits) => {
-  res.send('Number of visits ' + visits);
-  client.set('visits', parseInt(visits) + 1);
-});
-}); */
-
-app.listen(4000, () => {
-  console.log('listening on port 4000');
-});
