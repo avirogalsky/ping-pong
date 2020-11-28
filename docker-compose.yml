@@ -1,18 +1,14 @@
-version: '2'
+version: '3'
 services:
-  sender:
-    # image: docker.io/ayonnayihan/sample-sendr-rcv-test:sender0.1
-    build:
-      context: .
-      target: sender
+  app1:
+    build: .
     environment:
-      SEND_HOST: receiver
-      SEND_PORT: 5555
-  receiver:
-    # image: docker.io/ayonnayihan/sample-sendr-rcv-test:receiver0.1
-    build:
-      context: .
-      target: receiver
+      - PEER=app2
+    ports:
+      - '4001:4000'
+  app2:
+    build: .
     environment:
-      LISTEN_HOST: '0.0.0.0' #sender
-      LISTEN_PORT: 5555
+      - PEER=app1
+    ports:
+      - '4002:4000'
